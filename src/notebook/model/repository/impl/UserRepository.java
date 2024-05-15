@@ -1,6 +1,7 @@
 package notebook.model.repository.impl;
 
 import notebook.model.dao.impl.FileOperation;
+import notebook.util.UserValidator;
 import notebook.util.mapper.impl.UserMapper;
 import notebook.model.User;
 import notebook.model.repository.GBRepository;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public class UserRepository implements GBRepository {
     private final UserMapper mapper;
     private final FileOperation operation;
+    private final UserValidator userValidator = new UserValidator();
 
     public UserRepository(FileOperation operation) {
         this.mapper = new UserMapper();
@@ -30,6 +32,7 @@ public class UserRepository implements GBRepository {
 
     @Override
     public User create(User user) {
+        userValid(user);
         List<User> users = findAll();
         long max = 0L;
         for (User u : users) {
@@ -45,6 +48,11 @@ public class UserRepository implements GBRepository {
         return user;
     }
 
+    private void userValid(User user){
+        user.setFirstName(userValidator.validateName(user.getFirstName()));
+        user.setLastName(userValidator.validateName(user.getLastName()));
+    }
+
     @Override
     public Optional<User> findById(Long id) {
         return Optional.empty();
@@ -57,9 +65,12 @@ public class UserRepository implements GBRepository {
                 .filter(u -> u.getId()
                         .equals(userId))
                 .findFirst().orElseThrow(() -> new RuntimeException("User not found"));
-        editUser.setFirstName(update.getFirstName());
-        editUser.setLastName(update.getLastName());
-        editUser.setPhone(update.getPhone());
+        if(!update.getFirstName().isEmpty())
+            editUser.setFirstName(update.getFirstName());
+        if(!update.getLastName().isEmpty())
+            editUser.setLastName(update.getLastName());
+        if(!update.getPhone().isEmpty())
+            editUser.setPhone(update.getPhone());
         write(users);
         return Optional.of(update);
     }
