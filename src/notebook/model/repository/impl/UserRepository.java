@@ -9,8 +9,6 @@ import notebook.model.repository.GBRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.stream.Collectors;
 
 public class UserRepository implements GBRepository {
     private final UserMapper mapper;
@@ -60,11 +58,6 @@ public class UserRepository implements GBRepository {
     private void userValid(User user){
         user.setFirstName(userValidator.validateName(user.getFirstName()));
         user.setLastName(userValidator.validateName(user.getLastName()));
-    }
-
-    @Override
-    public Optional<User> findById(Long id) {
-        return Optional.empty();
     }
 
     @Override
