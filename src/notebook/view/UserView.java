@@ -4,6 +4,8 @@ import notebook.controller.UserController;
 import notebook.model.User;
 import notebook.util.Commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class UserView {
@@ -21,12 +23,21 @@ public class UserView {
             com = Commands.valueOf(command);
             if (com == Commands.EXIT) return;
             switch (com) {
+                case HELP:
+                    for(Commands c: Commands.values()){
+                        System.out.println(c);
+                    }
+                    break;
+                case ADD_ALL:
+                    addAllUsersCommand();
+                    break;
+
                 case CREATE:
-                    User u = createUser();
+                    User u = userPrompt();
                     userController.saveUser(u);
                     break;
                 case READ:
-                    String id = prompt("Идентификатор пользователя: ");
+                    String id = userIdPrompt();
                     try {
                         User user = userController.readUser(Long.parseLong(id));
                         System.out.println(user);
@@ -36,13 +47,38 @@ public class UserView {
                     }
                     break;
                 case UPDATE:
-                    String userId = prompt("Enter user id: ");
-                    userController.updateUser(userId, createUser());
+                    userController.updateUser(userIdPrompt(), userPrompt());
+                    printAllUsers();
+                    break;
 
                 case LIST:
-                    System.out.println(userController.findAll());
+                    printAllUsers();
+                    break;
+
+                case DELETE:
+                    System.out.println(userController.deleteUser(userIdPrompt()));
+                    printAllUsers();
+                    break;
             }
         }
+    }
+
+    private void addAllUsersCommand(){
+        String commandFlag = addAllPrompt();
+        List<User> addedUsers = new ArrayList<>();
+
+        while(commandFlag.equals("add")){
+            User user = userPrompt();
+            addedUsers.add(user);
+            commandFlag = addAllPrompt();
+        }
+
+        userController.addAll(addedUsers);
+        System.out.println("all users added");
+    }
+
+    private String addAllPrompt(){
+        return prompt("Введите add для создания пользователя или любое другое слово для прекращения команды: ");
     }
 
     private String prompt(String message) {
@@ -51,10 +87,18 @@ public class UserView {
         return in.nextLine();
     }
 
-    private User createUser() {
+    private void printAllUsers(){
+        System.out.println(userController.findAll());
+    }
+
+    private String userIdPrompt(){
+        return prompt("Идентификатор пользователя: ");
+    }
+
+    private User userPrompt() {
         String firstName = prompt("Имя: ");
         String lastName = prompt("Фамилия: ");
         String phone = prompt("Номер телефона: ");
-        return new User(firstName, lastName, phone);
+        return userController.getNewUser(firstName, lastName, phone);
     }
 }

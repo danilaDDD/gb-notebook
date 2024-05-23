@@ -1,7 +1,8 @@
 package notebook.util;
 
 public enum Commands {
-    NONE,
+    HELP,
+    ADD_ALL,
     READ,
     CREATE,
     UPDATE,
